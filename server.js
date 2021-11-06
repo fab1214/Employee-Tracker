@@ -28,7 +28,7 @@ const userInput = () => {
     .prompt([
       {
         type: "list",
-        name: "selection",
+        name: "choices",
         message: "What would you like to do?",
         choices: [
           "view all departments",
@@ -38,17 +38,51 @@ const userInput = () => {
           "add a role",
           "add an employee",
           "update employee role",
+          "exit"
         ],
       },
     ])
     .then((answers) => {
+        const { choices } = answers;
       // Use user feedback for... whatever!!
-    })
-    .catch((error) => {
-      if (error.isTtyError) {
-        // Prompt couldn't be rendered in the current environment
-      } else {
-        // Something else went wrong
-      }
+        if(choices === "view all departments") {
+            viewDepartments();
+        }
+        
+        if(choices === "view all roles") {
+            viewRoles();
+        }
+
+        if(choices === "view all employees") {
+            viewEmployees();
+        }
+
+        if(choices === "add a department") {
+            addDepartment();
+        }
+
+        if(choices === "add a role") {
+            addRole();
+        }
+
+        if(choices === "add an employee") {
+            addEmployee();
+        }
+
+        if(choices === "update employee role") {
+            updateRole();
+        }
+
+        if(choices === "exit") {
+            db.end()
+        }
+    // .catch((error) => {
+    //   if (error.isTtyError) {
+    //     // Prompt couldn't be rendered in the current environment
+    //   } else {
+    //     // Something else went wrong
+    //   }
     });
 };
+
+userInput();
