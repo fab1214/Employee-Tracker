@@ -23,12 +23,12 @@ const db = mysql.createConnection(
 //     }
 //   ]);
 
-const userInput = () => {
+const promptUser = () => {
   return inquirer
     .prompt([
       {
         type: "list",
-        name: "choices",
+        name: "choice",
         message: "What would you like to do?",
         choices: [
           "view all departments",
@@ -43,46 +43,95 @@ const userInput = () => {
       },
     ])
     .then((answers) => {
-        const { choices } = answers;
+        const { choice } = answers;
       // Use user feedback for... whatever!!
-        if(choices === "view all departments") {
+        if(choice === "view all departments") {
             viewDepartments();
         }
         
-        if(choices === "view all roles") {
+        if(choice === "view all roles") {
             viewRoles();
         }
 
-        if(choices === "view all employees") {
+        if(choice === "view all employees") {
             viewEmployees();
         }
 
-        if(choices === "add a department") {
+        if(choice === "add a department") {
             addDepartment();
         }
 
-        if(choices === "add a role") {
+        if(choice === "add a role") {
             addRole();
         }
 
-        if(choices === "add an employee") {
+        if(choice === "add an employee") {
             addEmployee();
         }
 
-        if(choices === "update employee role") {
+        if(choice === "update employee role") {
             updateRole();
         }
 
-        if(choices === "exit") {
+        if(choice === "exit") {
             db.end()
         }
-    // .catch((error) => {
-    //   if (error.isTtyError) {
-    //     // Prompt couldn't be rendered in the current environment
-    //   } else {
-    //     // Something else went wrong
-    //   }
     });
 };
 
-userInput();
+//define functions from choices list
+viewDepartments = () => {
+    const sql = `SELECT * FROM department`;
+    db.query(sql, (err, rows)=> {
+        if(err){
+            throw err;
+        }
+        console.table(rows);
+        promptUser();
+    })
+};
+
+viewRoles = () => {
+    const sql = `SELECT role.title AS job_title, role.id AS role_id, role.salary AS salary, department.name AS department FROM role INNER JOIN department ON role.department_id = department.id`;
+    db.query(sql, (err, rows)=>{
+        if(err){
+            throw err;
+        }
+        console.table(rows);
+        promptUser();
+    })
+};
+
+viewEmployees = () => {
+    const sql = `
+    SELECT employee.id AS employee_id, 
+    employee.first_name AS first_name, 
+    employee.last_name AS last_name, 
+    role.title AS job_title, 
+    department.name AS department, 
+    role.salary AS salary, 
+    CONCAT (manager.first_name, ' ', manager.last_name) AS manager
+    FROM employee
+    LEFT JOIN role ON employee.role_id = role.id
+    LEFT JOIN department ON role.department_id = department.id
+    LEFT JOIN employee manager ON employee.manager_id = manager.id;
+    `
+    db.query(sql, (err, rows)=>{
+        if(err){
+            throw err;
+        }
+        console.table(rows);
+        promptUser();
+    })
+};
+
+promptUser();
+
+
+// .catch((error) => {
+//     if (error.isTtyError) {
+//       // Prompt couldn't be rendered in the current environment
+//     } else {
+//       // Something else went wrong
+//     }
+

@@ -24,3 +24,18 @@ CREATE TABLE employee(
     CONSTRAINT fk_role FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE SET NULL,
     CONSTRAINT fk_manager FOREIGN KEY (manager_id) REFERENCES employee(id) ON DELETE SET NULL
 );  
+
+-- -- identify column names
+-- SELECT employee.id AS employee_id, 
+-- employee.first_name AS first_name, 
+-- employee.last_name AS last_name, 
+-- role.title AS job_title, 
+-- department.name AS department, 
+-- role.salary AS salary, 
+-- CONCAT (manager.first_name, ' ', manager.last_name) AS manager
+-- -- identify main table
+-- FROM employee
+-- -- identify the FK on main table, PK on table to be joined
+-- LEFT JOIN role ON employee.role_id = role.id
+-- LEFT JOIN department ON role.department_id = department.id
+-- LEFT JOIN employee manager ON employee.manager_id = manager.id;
