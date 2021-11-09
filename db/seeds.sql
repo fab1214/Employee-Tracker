@@ -1,4 +1,4 @@
-INSERT INTO department (name)
+INSERT IGNORE INTO department (name)
 VALUES
 ('Marketing');
 
