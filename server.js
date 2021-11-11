@@ -191,6 +191,8 @@ addRole = () => {
         const sql = `SELECT * FROM department`;
         //call sql query to view all from dept and display dept names from result parameter
         db.query(sql, (err, result) => {
+          const roleDept = result.map(({ name, id }) => ({ name: name, value: id }));
+          console.log(result);
           inquirer
             .prompt([
               {
@@ -198,7 +200,7 @@ addRole = () => {
                 name: "roleDepartment",
                 message: "What department is the new role in?",
                 //choices pulled from result parameter in sql query (above)
-                choices: result
+                choices: roleDept
               },
             ])
             //collect user department choice and assign to newRoleDept variable
@@ -206,7 +208,6 @@ addRole = () => {
               const newRoleDept = choice.roleDepartment;
               //push newRoleDept variable to params array
               params.push(newRoleDept);
-              console.log(params);
               //RUN INSERT QUERY NEXT TO UPDATE ROLES TABLE
               const sql = `INSERT INTO role(title, salary, department_id) VALUES (?,?,?)`;
               db.query(sql, params, (err, result) => {
