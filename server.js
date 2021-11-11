@@ -81,7 +81,7 @@ const promptUser = () => {
 
 //define functions from choices list
 viewDepartments = () => {
-  const sql = `SELECT * FROM department ORDER BY id ASC`;
+  const sql = `SELECT * FROM department ORDER BY id ASC;`;
   db.query(sql, (err, rows) => {
     if (err) {
       throw err;
@@ -92,7 +92,7 @@ viewDepartments = () => {
 };
 
 viewRoles = () => {
-  const sql = `SELECT role.title AS job_title, role.id AS role_id, role.salary AS salary, department.name AS department FROM role INNER JOIN department ON role.department_id = department.id`;
+  const sql = `SELECT role.title AS job_title, role.id AS role_id, role.salary AS salary, department.name AS department FROM role INNER JOIN department ON role.department_id = department.id;`;
   db.query(sql, (err, rows) => {
     if (err) {
       throw err;
@@ -188,19 +188,22 @@ addRole = () => {
       //collect user answers and push to params array
       .then((answers) => {
         const params = [answers.roleName, answers.roleSalary];
-        const sql = `SELECT * FROM department`;
+        const sql = `SELECT * FROM department;`;
         //call sql query to view all from dept and display dept names from result parameter
         db.query(sql, (err, result) => {
-          const roleDept = result.map(({ name, id }) => ({ name: name, value: id }));
-          console.log(result);
+          //map out each department name and id to display in dept list to assign role below
+          const roleDept = result.map(({ name, id }) => ({
+            name: name,
+            value: id,
+          }));
           inquirer
             .prompt([
               {
                 type: "list",
                 name: "roleDepartment",
                 message: "What department is the new role in?",
-                //choices pulled from result parameter in sql query (above)
-                choices: roleDept
+                //choices pulled from result parameter in sql query (above) with their respective id
+                choices: roleDept,
               },
             ])
             //collect user department choice and assign to newRoleDept variable
@@ -223,6 +226,89 @@ addRole = () => {
   );
 };
 
+const addEmployee = () => {
+  return inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "employeeFirstName",
+        message: "What is the first name of the employee?",
+        validate: (employeeName) => {
+          if (employeeName) {
+            return true;
+          } else {
+            console.log("Please enter a first name");
+            return false;
+          }
+        },
+      },
+      {
+        type: "input",
+        name: "employeeLastName",
+        message: "What is the last name of the employee?",
+        validate: (employeeName) => {
+          if (employeeName) {
+            return true;
+          } else {
+            console.log("Please enter a last name");
+            return false;
+          }
+        },
+      },
+    ])
+    .then((answers) => {
+      const params = [answers.employeeFirstName, answers.employeeLastName];
+      const sql = `SELECT role.title AS title, role.id AS id FROM role;`;
+      //call sql query to view all from roles
+      db.query(sql, (err, result) => {
+        //map out each role name and id to display in role list to assign employee below
+        const role = result.map(({ title, id }) => ({ name: title, value: id }));
+        inquirer.prompt([
+          {
+            type: "list",
+            name: "role",
+            message: "Pick a role for the new employee",
+            choices: role,
+          },
+        ])
+        .then((choice)=> {
+          const employeeRole = choice.role;
+          params.push(employeeRole);
+          const sql = `SELECT CONCAT(first_name, " ", last_name) AS name, id FROM employee;`;
+          db.query(sql, params, (err, result)=> {
+            //map out manager list to be full name & id
+            const manager = result.map(({ name, id }) => ({ name: name, value: id}));
+            inquirer
+            .prompt([
+              {
+                type: 'list',
+                name: 'employeeManager',
+                message: 'Select an employee to assign as the manager for the new employee',
+                choices: manager
+              }
+            ])
+            .then((choice)=> {
+              ///assign manager choice to newRoleManager variable
+              const newRoleManager = choice.employeeManager;
+              //push manager choice to params array
+              params.push(newRoleManager);
+              const sql = `INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES(?,?,?,?);`
+              db.query(sql, params,(err, result) => {
+                if(err){
+                  throw err;
+                }
+                console.log('New employee added');
+                viewEmployees();
+              })
+            })
+          })
+        })
+      });
+    });
+};
+
+promptUser();
+
 //     .then((answers) => {
 //       const sql = `INSERT INTO role(title, salary, department_id) VALUES (?,?,?)`;
 //       db.query(sql, params, (err, result) => {
@@ -235,8 +321,6 @@ addRole = () => {
 //       );
 //     });
 // };
-
-promptUser();
 
 // .catch((error) => {
 //     if (error.isTtyError) {
