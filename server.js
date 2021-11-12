@@ -192,10 +192,7 @@ addRole = () => {
         //call sql query to view all from dept and display dept names from result parameter
         db.query(sql, (err, result) => {
           //map out each department name and id to display in dept list to assign role below
-          const roleDept = result.map(({ name, id }) => ({
-            name: name,
-            value: id,
-          }));
+          const roleDept = result.map(({ name, id }) => ({ name: name, value: id }));
           inquirer
             .prompt([
               {
@@ -307,24 +304,53 @@ const addEmployee = () => {
     });
 };
 
+const updateEmployee = () => {
+  const sql = `SELECT CONCAT(employee.first_name, " ", employee.last_name) AS name, employee.id AS id FROM employee;`
+  db.query(sql, (err, result)=>{
+    const employeeChoice = result.map(({ name, id }) => ({ name: name, value: id }));
+    inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'employeeChoice',
+        message: 'Please choose the employee whose role you would like to update',
+        choices: employeeChoice
+      }
+    ])
+    .then((choice)=> {
+      const employee = choice.employeeChoice;
+      const params = [];
+      //new sql call to select roles from role table
+      const sql = `SELECT role.title AS title, role.id AS id FROM role;`;
+      db.query(sql, params, (err, results)=> {
+        const newRole = results.map(({ title, id }) => ({ name: title, value: id }));
+        inquirer
+        .prompt([
+          {
+            type: 'list',
+            name: 'updatedRole',
+            message: "Select the employee's new role",
+            choices: newRole
+          }
+        ])
+        .then((answer) => {
+          const roleChoice = answer.updatedRole;
+          //push role id as first item in array to match sql statement below
+          params.push(roleChoice);
+          //push employee id as second item in array to match sql statement below
+          params.push(employee);
+          const sql = `UPDATE employee SET employee.role_id = ? WHERE employee.id = ?;`
+          db.query(sql, params, (err, result)=> {
+            if(err){
+              throw err
+            }
+            console.log(result);
+            viewEmployees();
+          })
+        })
+      })
+    })
+
+})
+}
 promptUser();
-
-//     .then((answers) => {
-//       const sql = `INSERT INTO role(title, salary, department_id) VALUES (?,?,?)`;
-//       db.query(sql, params, (err, result) => {
-//           if (err) {
-//             throw err;
-//           }
-//           console.log("Added " + answers.roleName + " to roles table");
-//           viewRoles();
-//         }
-//       );
-//     });
-// };
-
-// .catch((error) => {
-//     if (error.isTtyError) {
-//       // Prompt couldn't be rendered in the current environment
-//     } else {
-//       // Something else went wrong
-//     }
