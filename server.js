@@ -72,7 +72,7 @@ viewDepartments = () => {
 };
 
 viewRoles = () => {
-  const sql = `SELECT role.title AS job_title, role.id AS role_id, role.salary AS salary, department.name AS department FROM role INNER JOIN department ON role.department_id = department.id;`;
+  const sql = `SELECT role.title AS job_title, role.id AS role_id, role.salary AS salary, department.name AS department FROM role INNER JOIN department ON role.department_id = department.id ORDER BY role_id ASC`;
   db.query(sql, (err, rows) => {
     if (err) {
       throw err;
