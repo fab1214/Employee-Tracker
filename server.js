@@ -2,27 +2,7 @@ const inquirer = require("inquirer");
 const mysql = require("mysql2");
 const cTable = require("console.table");
 const db = require("./db/connection");
-// const db = mysql.createConnection(
-//   {
-//     host: "localhost",
-//     //Your MySQL username
-//     user: "root",
-//     //Your MySQL password
-//     password: "hey",
-//     database: "company",
-//   },
-//   console.log("Connected to the company database")
-// );
 
-// console.table([
-//     {
-//       name: 'foo',
-//       age: 10
-//     }, {
-//       name: 'bar',
-//       age: 20
-//     }
-//   ]);
 
 const promptUser = () => {
   return inquirer
